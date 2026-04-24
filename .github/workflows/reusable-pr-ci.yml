@@ -1,0 +1,51 @@
+name: Reusable PR CI
+
+on:
+  workflow_call:
+
+jobs:
+  baseline:
+    name: baseline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Shell syntax baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(git ls-files '*.sh')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo 'SKIP: no shell files'
+            exit 0
+          fi
+          for path in "${files[@]}"; do
+            bash -n "$path"
+          done
+          echo "PASS: checked ${#files[@]} shell files"
+
+      - name: Python syntax baseline
+        run: |
+          python - <<'PY'
+          import py_compile
+          import subprocess
+
+          files = subprocess.check_output(['git', 'ls-files', '*.py'], text=True).splitlines()
+          if not files:
+              print('SKIP: no python files')
+              raise SystemExit(0)
+          for path in files:
+              py_compile.compile(path, doraise=True)
+          print(f'PASS: compiled {len(files)} Python files')
+          PY
+
+      - name: Workflow lint
+        if: ${{ hashFiles('.github/workflows/*.yml', '.github/workflows/*.yaml') != '' }}
+        uses: reviewdog/action-actionlint@v1
