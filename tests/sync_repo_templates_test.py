@@ -13,8 +13,10 @@ import sync_repo_templates as sync
 
 
 class SyncRepoTemplatesTest(unittest.TestCase):
-    def test_clone_command_uses_shallow_single_branch_fetch(self):
+    def test_clone_command_uses_sparse_partial_shallow_fetch(self):
         command = sync.clone_command("nakkulla/example", Path("/tmp/example"))
+        self.assertIn("--filter=blob:none", command)
+        self.assertIn("--sparse", command)
         self.assertIn("--depth", command)
         self.assertIn("1", command)
         self.assertIn("--single-branch", command)

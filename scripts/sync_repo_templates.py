@@ -150,7 +150,10 @@ def list_owner_repos(owner: str) -> list[str]:
 
 
 def clone_command(repo: str, target: Path) -> list[str]:
-    return ["gh", "repo", "clone", repo, str(target), "--", "--quiet", "--depth", "1", "--single-branch"]
+    return [
+        "gh", "repo", "clone", repo, str(target), "--",
+        "--quiet", "--filter=blob:none", "--sparse", "--depth", "1", "--single-branch",
+    ]
 
 
 def clone_repo(repo: str, workspace: Path) -> Path:
@@ -158,6 +161,7 @@ def clone_repo(repo: str, workspace: Path) -> Path:
     if target.exists():
         shutil.rmtree(target)
     run(clone_command(repo, target))
+    run(["git", "sparse-checkout", "set", ".github", ".gemini"], cwd=target)
     return target
 
 
