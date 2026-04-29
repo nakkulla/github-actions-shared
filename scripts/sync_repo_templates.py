@@ -189,6 +189,10 @@ def print_plan(repo: str, plan: ChangePlan) -> None:
         print(f"  {change.action}: {change.path}")
 
 
+def plan_blocks_run(plan: ChangePlan, dry_run: bool) -> bool:
+    return False if dry_run else plan.has_blocking_collisions()
+
+
 def stage_managed_files(repo_dir: Path, rendered: dict[Path, str]) -> None:
     paths = [rel.as_posix() for rel in sorted(rendered)]
     paths.append(MANIFEST_PATH.as_posix())
@@ -246,10 +250,11 @@ def main(argv: list[str] | None = None) -> int:
             print_plan(repo, plan)
             if not can_apply:
                 print("  BLOCKED: collisions require --adopt-collisions")
-                failed += 1
-                continue
+                if plan_blocks_run(plan, dry_run=args.dry_run):
+                    failed += 1
+                    continue
             if args.dry_run:
-                if plan.has_working_tree_changes() or plan.has_manifest_adoptions():
+                if plan.has_working_tree_changes() or plan.has_manifest_adoptions() or plan.has_blocking_collisions():
                     changed += 1
                 continue
             backup = create_backup_branch(repo_dir, branch)

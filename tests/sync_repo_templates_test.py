@@ -59,6 +59,18 @@ class SyncRepoTemplatesTest(unittest.TestCase):
             self.assertEqual(plan[Path(".gemini/different.md")].action, "collision")
             self.assertTrue(plan.has_blocking_collisions())
 
+    def test_dry_run_does_not_treat_collisions_as_exit_failures(self):
+        plan = sync.ChangePlan({
+            Path(".github/workflows/pr-ci.yml"): sync.Change(
+                action="collision",
+                path=Path(".github/workflows/pr-ci.yml"),
+                old_sha="old",
+                new_sha="new",
+            )
+        })
+        self.assertFalse(sync.plan_blocks_run(plan, dry_run=True))
+        self.assertTrue(sync.plan_blocks_run(plan, dry_run=False))
+
     def test_write_manifest_is_deterministic(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
