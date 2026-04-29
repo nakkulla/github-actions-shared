@@ -201,10 +201,14 @@ def plan_blocks_run(plan: ChangePlan, dry_run: bool) -> bool:
     return False if dry_run else plan.has_blocking_collisions()
 
 
+def stage_command(paths: list[Path]) -> list[str]:
+    return ["git", "add", "-f", "--", *(path.as_posix() for path in paths)]
+
+
 def stage_managed_files(repo_dir: Path, rendered: dict[Path, str]) -> None:
-    paths = [rel.as_posix() for rel in sorted(rendered)]
-    paths.append(MANIFEST_PATH.as_posix())
-    run(["git", "add", "--", *paths], cwd=repo_dir)
+    paths = sorted(rendered)
+    paths.append(MANIFEST_PATH)
+    run(stage_command(paths), cwd=repo_dir)
 
 
 def has_staged_changes(repo_dir: Path) -> bool:

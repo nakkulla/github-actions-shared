@@ -79,6 +79,13 @@ class SyncRepoTemplatesTest(unittest.TestCase):
         self.assertFalse(sync.plan_blocks_run(plan, dry_run=True))
         self.assertTrue(sync.plan_blocks_run(plan, dry_run=False))
 
+    def test_stage_command_forces_ignored_managed_files_only(self):
+        command = sync.stage_command([Path(".gemini/config.yaml"), Path(".github/workflows/pr-ci.yml")])
+        self.assertEqual(command[:3], ["git", "add", "-f"])
+        self.assertIn("--", command)
+        self.assertIn(".gemini/config.yaml", command)
+        self.assertIn(".github/workflows/pr-ci.yml", command)
+
     def test_write_manifest_is_deterministic(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp)
