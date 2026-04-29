@@ -149,11 +149,15 @@ def list_owner_repos(owner: str) -> list[str]:
     return [r["nameWithOwner"] for r in repos if not r.get("isArchived") and not r.get("isFork")]
 
 
+def clone_command(repo: str, target: Path) -> list[str]:
+    return ["gh", "repo", "clone", repo, str(target), "--", "--quiet", "--depth", "1", "--single-branch"]
+
+
 def clone_repo(repo: str, workspace: Path) -> Path:
     target = workspace / repo.split("/", 1)[1]
     if target.exists():
         shutil.rmtree(target)
-    run(["gh", "repo", "clone", repo, str(target), "--", "--quiet"])
+    run(clone_command(repo, target))
     return target
 
 

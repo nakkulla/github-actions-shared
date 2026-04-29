@@ -13,6 +13,12 @@ import sync_repo_templates as sync
 
 
 class SyncRepoTemplatesTest(unittest.TestCase):
+    def test_clone_command_uses_shallow_single_branch_fetch(self):
+        command = sync.clone_command("nakkulla/example", Path("/tmp/example"))
+        self.assertIn("--depth", command)
+        self.assertIn("1", command)
+        self.assertIn("--single-branch", command)
+
     def test_load_profile_uses_json_and_resolves_include_dirs(self):
         profile = sync.load_profile(ROOT, "agent-workflow")
         self.assertEqual(profile["name"], "agent-workflow")
