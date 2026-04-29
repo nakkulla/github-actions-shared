@@ -1,0 +1,23 @@
+{
+  "name": "agent-workflow",
+  "include": [
+    "templates/gemini/default",
+    "templates/gemini/agent-workflow",
+    "templates/github/default"
+  ],
+  "repo_selection": {
+    "owner": "nakkulla",
+    "exclude": ["github-actions-shared"]
+  },
+  "sync": {
+    "mode": "direct-push",
+    "branch": "main",
+    "commit_message": "chore: shared github/gemini templates 동기화"
+  },
+  "safety": {
+    "require_clean_worktree": true,
+    "create_backup_branch": true,
+    "never_delete_unmanaged_files": true,
+    "only_prune_managed_files": true
+  }
+}

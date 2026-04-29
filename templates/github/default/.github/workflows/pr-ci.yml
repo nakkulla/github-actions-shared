@@ -1,0 +1,9 @@
+name: PR CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  baseline:
+    uses: nakkulla/github-actions-shared/.github/workflows/reusable-pr-ci.yml@main
